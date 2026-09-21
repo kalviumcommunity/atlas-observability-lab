@@ -1,0 +1,31 @@
+services:
+  app:
+    build: .
+    container_name: atlas-app
+    ports:
+      - "8080:8080"
+    environment:
+      # Set to 1 to simulate the payments dependency being down.
+      - FORCE_DEP_DOWN=${FORCE_DEP_DOWN:-0}
+
+  prometheus:
+    image: prom/prometheus:v2.53.0
+    container_name: atlas-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./alerts.yml:/etc/prometheus/alerts.yml:ro
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+
+  grafana:
+    image: grafana/grafana:11.1.0
+    container_name: atlas-grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+    depends_on:
+      - prometheus

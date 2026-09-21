@@ -1,0 +1,16 @@
+groups:
+  - name: checkout-alerts
+    rules:
+      - alert: HighErrorRate
+        # Intended: fire when the checkout error rate exceeds 10% for 1m.
+        expr: |
+          sum(rate(checkout_requests_total{status="error"}[1m]))
+          /
+          sum(rate(checkout_requests_total[1m]))
+          < 0.10
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "High checkout error rate"
+          description: "Checkout error rate is above 10% over the last minute."
