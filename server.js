@@ -40,8 +40,6 @@ app.get('/checkout', (req, res) => {
 
   if (!dep.ok) {
     requestCounter.inc({ status: 'error' });
-    // NOTE: this line is logged as a normal request, not flagged as an error,
-    // and does not carry a request_id — so it can't be traced later.
     logLine({
       timestamp: new Date().toISOString(),
       message: `checkout failed: ${dep.reason}`,
@@ -61,7 +59,6 @@ app.get('/checkout', (req, res) => {
 });
 
 app.get('/health', (req, res) => {
-  // NOTE: always reports healthy, regardless of downstream dependency state.
   res.status(200).json({ status: 'ok' });
 });
 
