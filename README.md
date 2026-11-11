@@ -32,7 +32,7 @@ stack up with the dependency forced down, then drive an error spike:
 
 ```bash
 FORCE_DEP_DOWN=1 docker compose up -d --build
-./simulate-incident.sh 120        # hammer /checkout for 120s
+bash simulate-incident.sh 120        # hammer /checkout for 120s
 ```
 
 ---
@@ -77,13 +77,13 @@ FORCE_DEP_DOWN=1 docker compose up -d --build
 curl -i http://localhost:8080/health                 # 503 {"status":"degraded"}; container unhealthy
 docker compose logs app | grep '"level":"error"'     # shows the failing request with a request_id
 
-./simulate-incident.sh 120
+bash simulate-incident.sh 120
 # http://localhost:9090/alerts -> HighErrorRate FIRING
 ```
 
 ---
 
-## The three faults to fix
+## Task boundaries
 
 | Task | Area | What's wrong |
 |---|---|---|
@@ -92,3 +92,11 @@ docker compose logs app | grep '"level":"error"'     # shows the failing request
 | 3 | Alerting | The `HighErrorRate` condition in `alerts.yml` never becomes true |
 
 Fix all three, then re-run the verification sequence above.
+
+## Prerequisites and boundaries
+
+Git, running Docker Engine with Compose v2, curl and internet access for images/npm dependencies. Reserve host ports 8080, 9090 and 3000. Commands run from repository root; Bash is needed for supplied traffic loops/scripts. No host Node.js installation, cloud account, billing or real credentials needed. Local monitoring interfaces are exercise-only; do not expose them on a public network. Repair only documented health, logging and monitoring faults; preserve existing service routes, controlled failures and metric semantics. Do not disable checks or fabricate log/metric output.
+
+Wait for listeners, health probes and initial scrapes before interpreting results. After application/image changes run `docker compose up -d --build`; after mounted Prometheus/rule changes run `docker compose restart prometheus`. Local stack status does not prove notification delivery or production readiness.
+
+Cleanup only exercise resources: `docker compose down`.
